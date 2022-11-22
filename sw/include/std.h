@@ -30,6 +30,10 @@
 #include <stdbool.h>
 #include <math.h>
 
+#ifdef SITL
+#include <stdio.h> // for debuging in simulation
+#endif
+
 /* some convenience macros to print debug/config messages at compile time */
 #include "message_pragmas.h"
 
@@ -93,8 +97,12 @@ typedef uint8_t unit_t;
 #define MOfCm(_x) (((float)(_x))/100.)
 #define MOfMm(_x) (((float)(_x))/1000.)
 
+#define And(x, y) ((x) && (y))
+#define Or(x, y) ((x) || (y))
 #define Min(x,y) (x < y ? x : y)
 #define Max(x,y) (x > y ? x : y)
+#define LessThan(_x, _y) ((_x) < (_y))
+#define MoreThan(_x, _y) ((_x) > (_y))
 
 #ifndef ABS
 #define ABS(val) ((val) < 0 ? -(val) : (val))

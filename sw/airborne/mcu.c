@@ -35,8 +35,8 @@
 #include "led.h"
 #endif
 #if defined RADIO_CONTROL
-#if defined RADIO_CONTROL_BIND_IMPL_FUNC & defined SPEKTRUM_BIND_PIN_PORT
-#include "modules/radio_control/radio_control.h"
+#if defined RADIO_CONTROL_BIND_IMPL_FUNC && defined SPEKTRUM_BIND_PIN_PORT
+#include "modules/radio_control/spektrum.h"
 #endif
 #endif
 #if USE_UART0 || USE_UART1 || USE_UART2 || USE_UART3 || USE_UART4 || USE_UART5 || USE_UART6 || USE_UART7 || USE_UART8
@@ -84,6 +84,16 @@ void WEAK board_init2(void)
   /* default board init function does nothing... */
 }
 
+void WEAK mcu_reboot(enum reboot_state_t reboot_state __attribute__((unused)))
+{
+  /* default reboot function does nothing... */
+}
+
+void WEAK mcu_energy_save(void)
+{
+  /* default power saving function does nothing... */
+}
+
 void mcu_init(void)
 {
   /* If we have a board specific init function, call it.
@@ -103,13 +113,11 @@ void mcu_init(void)
 
 #if defined BTN_ON
   gpio_setup_input(BTN_ON, BTN_ON_PIN);
-  if(gpio_get(BTN_ON, BTN_ON_PIN))
-  {
+  if (gpio_get(BTN_ON, BTN_ON_PIN)) {
     MCU_PWR_ON(MCU_PWR, MCU_PWR_PIN);
-  }
-  else {
+  } else {
     // Turn off and stop: wait until all power is off
-    while(true) {
+    while (true) {
       MCU_PWR_OFF(MCU_PWR, MCU_PWR_PIN);
     }
   }
@@ -132,7 +140,7 @@ void mcu_init(void)
   PERIPHERAL3V3_ENABLE_ON(PERIPHERAL3V3_ENABLE_PORT, PERIPHERAL3V3_ENABLE_PIN);
 #endif
   /* for now this means using spektrum */
-#if defined RADIO_CONTROL & defined RADIO_CONTROL_BIND_IMPL_FUNC & defined SPEKTRUM_BIND_PIN_PORT
+#if defined RADIO_CONTROL && defined RADIO_CONTROL_BIND_IMPL_FUNC && defined SPEKTRUM_BIND_PIN_PORT
   RADIO_CONTROL_BIND_IMPL_FUNC();
 #endif
 #if USE_UART0

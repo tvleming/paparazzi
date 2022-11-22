@@ -383,6 +383,155 @@ void WEAK gps_inject_data(uint8_t packet_id __attribute__((unused)), uint8_t len
 
 }
 
+void gps_parse_GPS_INJECT(uint8_t *buf)
+{
+  // Check if the GPS is for this AC
+  if (DL_GPS_INJECT_ac_id(buf) != AC_ID) { return; }
+
+  // GPS parse data
+  gps_inject_data(
+      DL_GPS_INJECT_packet_id(buf),
+      DL_GPS_INJECT_data_length(buf),
+      DL_GPS_INJECT_data(buf)
+      );
+}
+
+void gps_parse_RTCM_INJECT(uint8_t *buf)
+{
+  // GPS parse data
+  gps_inject_data(DL_RTCM_INJECT_packet_id(buf),
+      DL_RTCM_INJECT_data_length(buf),
+      DL_RTCM_INJECT_data(buf));
+}
+
+/**
+ * Get GPS lla (float)
+ * Converted on the fly if not available
+ * @param[in] gps_s pointer to the gps structure
+ * @return lla position in float (rad), altitude ellipsoid (m)
+ */
+struct LlaCoor_f lla_float_from_gps(struct GpsState *gps_s) {
+  struct LlaCoor_i lla_i = lla_int_from_gps(gps_s);
+  struct LlaCoor_f lla_f;
+  LLA_FLOAT_OF_BFP(lla_f, lla_i);
+  return lla_f;
+}
+
+/**
+ * Get GPS lla (integer)
+ * Converted on the fly if not available
+ * @param[in] gps_s pointer to the gps structure
+ * @return lla position (lat,lon: deg*1e7; alt: mm over ellipsoid)
+ */
+struct LlaCoor_i lla_int_from_gps(struct GpsState *gps_s) {
+  struct LlaCoor_i lla_i = { 0, 0, 0 };
+  if (bit_is_set(gps_s->valid_fields, GPS_VALID_POS_LLA_BIT)) {
+    return gps_s->lla_pos;
+  } else if (bit_is_set(gps_s->valid_fields, GPS_VALID_POS_ECEF_BIT)) {
+    lla_of_ecef_i(&lla_i, &gps_s->ecef_pos);
+  }
+  return lla_i;
+}
+
+/**
+ * Get GPS ecef pos (float)
+ * Converted on the fly if not available
+ * @param[in] gps_s pointer to the gps structure
+ * @return ecef position in float (m)
+ */
+struct EcefCoor_f ecef_float_from_gps(struct GpsState *gps_s) {
+  struct EcefCoor_i ecef_i = ecef_int_from_gps(gps_s);
+  struct EcefCoor_f ecef_f;
+  ECEF_FLOAT_OF_BFP(ecef_f, ecef_i);
+  return ecef_f;
+}
+
+/**
+ * Get GPS ecef pos (integer)
+ * Converted on the fly if not available
+ * @param[in] gps_s pointer to the gps structure
+ * @return ecef position in cm
+ */
+struct EcefCoor_i ecef_int_from_gps(struct GpsState *gps_s) {
+  struct EcefCoor_i ecef_i = { 0, 0, 0 };
+  if (bit_is_set(gps_s->valid_fields, GPS_VALID_POS_ECEF_BIT)) {
+    return gps_s->ecef_pos;
+  } else if (bit_is_set(gps_s->valid_fields, GPS_VALID_POS_LLA_BIT)) {
+    ecef_of_lla_i(&ecef_i, &gps_s->lla_pos);
+  }
+  return ecef_i;
+}
+
+/**
+ * Get GPS ecef velocity (float)
+ * Converted on the fly if not available
+ * @param[in] gps_s pointer to the gps structure
+ * @return ecef velocity in float (m/s)
+ */
+struct EcefCoor_f ecef_vel_float_from_gps(struct GpsState *gps_s) {
+  struct EcefCoor_i ecef_vel_i = ecef_vel_int_from_gps(gps_s);
+  struct EcefCoor_f ecef_vel_f;
+  ECEF_FLOAT_OF_BFP(ecef_vel_f, ecef_vel_i);
+  return ecef_vel_f;
+}
+
+/**
+ * Get GPS ecef velocity (integer)
+ * Converted on the fly if not available
+ * @param[in] gps_s pointer to the gps structure
+ * @return ecef velocity in cm/s
+ */
+struct EcefCoor_i ecef_vel_int_from_gps(struct GpsState *gps_s) {
+  struct EcefCoor_i ecef_vel_i = { 0, 0, 0 };
+  if (bit_is_set(gps_s->valid_fields, GPS_VALID_VEL_ECEF_BIT)) {
+    return gps_s->ecef_vel;
+  } else if (bit_is_set(gps_s->valid_fields, GPS_VALID_VEL_NED_BIT)) {
+    struct LtpDef_i def;
+    if (bit_is_set(gps_s->valid_fields, GPS_VALID_POS_LLA_BIT)) {
+      ltp_def_from_lla_i(&def, &gps_s->lla_pos);
+    } else { // assume ECEF
+      ltp_def_from_ecef_i(&def, &gps_s->ecef_pos);
+    }
+    ecef_of_ned_vect_i(&ecef_vel_i, &def, &gps_s->ned_vel);
+  }
+  return ecef_vel_i;
+}
+
+/**
+ * Get GPS ned velocity (float)
+ * Converted on the fly if not available
+ * @param[in] gps_s pointer to the gps structure
+ * @return ned velocity in float (m/s)
+ */
+struct NedCoor_f ned_vel_float_from_gps(struct GpsState *gps_s) {
+  struct NedCoor_i ned_vel_i = ned_vel_int_from_gps(gps_s);
+  struct NedCoor_f ned_vel_f;
+  VECT3_FLOAT_OF_CM(ned_vel_f, ned_vel_i);
+  return ned_vel_f;
+}
+
+/**
+ * Get GPS ned velocity (integer)
+ * Converted on the fly if not available
+ * @param[in] gps_s pointer to the gps structure
+ * @return ned velocity in cm/s
+ */
+struct NedCoor_i ned_vel_int_from_gps(struct GpsState *gps_s) {
+  struct NedCoor_i ned_vel_i = { 0, 0, 0 };
+  if (bit_is_set(gps_s->valid_fields, GPS_VALID_VEL_NED_BIT)) {
+    return gps_s->ned_vel;
+  } else if (bit_is_set(gps_s->valid_fields, GPS_VALID_VEL_ECEF_BIT)) {
+    struct LtpDef_i def;
+    if (bit_is_set(gps_s->valid_fields, GPS_VALID_POS_LLA_BIT)) {
+      ltp_def_from_lla_i(&def, &gps_s->lla_pos);
+    } else { // assume ECEF
+      ltp_def_from_ecef_i(&def, &gps_s->ecef_pos);
+    }
+    ned_of_ecef_vect_i(&ned_vel_i, &def, &gps_s->ecef_vel);
+  }
+  return ned_vel_i;
+}
+
 /**
  * Convenience functions to get utm position from GPS state
  */
@@ -446,7 +595,7 @@ static const uint16_t month_days[2][13] = {
   { 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366 }
 };
 
-// Count the days since start of 1980
+// Count the days since start of 1980, 6th of January
 // Counts year * 356 days + leap days + month lengths + days in month
 // The leap days counting needs the "+ 1" because GPS year 0 (i.e. 1980) was a leap year
 uint16_t gps_day_number(uint16_t year, uint8_t month, uint8_t day)
@@ -456,7 +605,7 @@ uint16_t gps_day_number(uint16_t year, uint8_t month, uint8_t day)
   uint16_t day_of_year = month_days[leap_year][month - 1] + day;
   if (gps_years == 0)
     return day_of_year;
-  return gps_years * 365 + ((gps_years - 1) / 4) + 1 + day_of_year;
+  return gps_years * 365 + ((gps_years - 1) / 4) + 1 + day_of_year - 6;
 }
 
 uint16_t gps_week_number(uint16_t year, uint8_t month, uint8_t day)

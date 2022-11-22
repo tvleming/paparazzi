@@ -18,6 +18,7 @@ Flapping wing frame equiped with
     <define name="CATASTROPHIC_BATTERY_KILL_DELAY" value="80" />
     <!-- in seconds-->
     <module name="telemetry" type="xbee_api"/>
+    <module name="telemetry" type="intermcu"/>
     <module name="imu" type="px4fmu_v2.4"/>
     <module name="gps" type="ublox" >
       <configure name="GPS_BAUD" value="B57600"/>
@@ -48,7 +49,6 @@ Flapping wing frame equiped with
     <module name="px4_flash"/>
     <module name="geo_mag" />
     <module name="air_data" />
-    <module name="send_imu_mag_current" />
     <module name="mag" type="hmc58xx">
       <configure name="MAG_HMC58XX_I2C_DEV" value="i2c1"/>
       <define name="MODULE_HMC58XX_UPDATE_AHRS" value="TRUE"/>
@@ -81,6 +81,11 @@ Flapping wing frame equiped with
     <module name="intermcu" type="uart">
       <configure name="INTERMCU_PORT" value="UART2" />
       <configure name="INTERMCU_BAUD" value="B1500000" />
+    </module>
+    <module name="telemetry" type="transparent">
+      <configure name="MODEM_PORT" value="$(INTERMCU_PORT)"/>
+      <configure name="MODEM_BAUD" value="$(INTERMCU_BAUD)"/>
+      <define name="TELEMETRY_DISABLE_RX"/>
     </module>
   </firmware>
 

@@ -363,9 +363,32 @@
 #define IMU_BMI088_ID 19
 #endif
 
+#ifndef IMU_CUBE1_ID
+#define IMU_CUBE1_ID 20
+#endif
+
+#ifndef IMU_CUBE2_ID
+#define IMU_CUBE2_ID 21
+#endif
+
+#ifndef IMU_CUBE3_ID
+#define IMU_CUBE3_ID 22
+#endif
+
+#ifndef IMU_NPS_ID
+#define IMU_NPS_ID 23
+#endif
+
 // prefiltering with OneEuro filter
 #ifndef IMU_F1E_ID
 #define IMU_F1E_ID 30
+#endif
+
+/*
+ * ID for AHRS aligner
+ */
+#ifndef AHRS_ALIGNER_ID
+#define AHRS_ALIGNER_ID 1
 #endif
 
 /*
@@ -536,6 +559,45 @@
 
 #ifndef CLOUD_SENSOR_ID
 #define CLOUD_SENSOR_ID 1
+#endif
+
+/*
+ * RADIO_CONTROL message
+ */
+#ifndef RADIO_CONTROL_PPM_ID
+#define RADIO_CONTROL_PPM_ID 1
+#endif
+
+#ifndef RADIO_CONTROL_SBUS_ID
+#define RADIO_CONTROL_SBUS_ID 2
+#endif
+
+#ifndef RADIO_CONTROL_SBUS_DUAL_ID
+#define RADIO_CONTROL_SBUS_DUAL_ID 3
+#endif
+
+#ifndef RADIO_CONTROL_SPEKTRUM_ID
+#define RADIO_CONTROL_SPEKTRUM_ID 4
+#endif
+
+#ifndef RADIO_CONTROL_SUPERBITRF_RC_ID
+#define RADIO_CONTROL_SUPERBITRF_RC_ID 5
+#endif
+
+#ifndef RADIO_CONTROL_HOTT_ID
+#define RADIO_CONTROL_HOTT_ID 6
+#endif
+
+#ifndef RADIO_CONTROL_DATALINK_ID
+#define RADIO_CONTROL_DATALINK_ID 7
+#endif
+
+#ifndef RADIO_CONTROL_FRSKY_ID
+#define RADIO_CONTROL_FRSKY_ID 8
+#endif
+
+#ifndef RADIO_CONTROL_INTERMCU_ID
+#define RADIO_CONTROL_INTERMCU_ID 9
 #endif
 
 #endif /* ABI_SENDER_IDS_H */

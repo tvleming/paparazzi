@@ -62,6 +62,7 @@ extern int32_t nav_circle_radius, nav_circle_qdr, nav_circle_radians;
 #define HORIZONTAL_MODE_CIRCLE    2
 #define HORIZONTAL_MODE_ATTITUDE  3
 #define HORIZONTAL_MODE_MANUAL    4
+#define HORIZONTAL_MODE_GUIDED    5
 extern int32_t nav_roll, nav_pitch;     ///< with #INT32_ANGLE_FRAC
 extern int32_t nav_heading; ///< with #INT32_ANGLE_FRAC
 extern int32_t nav_cmd_roll, nav_cmd_pitch, nav_cmd_yaw;
@@ -80,6 +81,7 @@ extern float flight_altitude;
 #define VERTICAL_MODE_MANUAL      0
 #define VERTICAL_MODE_CLIMB       1
 #define VERTICAL_MODE_ALT         2
+#define VERTICAL_MODE_GUIDED      3
 
 extern float dist2_to_home;      ///< squared distance to home waypoint
 extern bool too_far_from_home;
@@ -119,6 +121,8 @@ extern bool exception_flag[10];
 
 extern void nav_init(void);
 extern void nav_run(void);
+extern void nav_parse_BLOCK(uint8_t *buf);
+extern void nav_parse_MOVE_WP(uint8_t *buf);
 
 extern void set_exception_flag(uint8_t flag_num);
 
@@ -303,7 +307,7 @@ static inline void NavGlide(uint8_t start_wp, uint8_t wp)
 {
   int32_t start_alt = waypoints[start_wp].enu_i.z;
   int32_t diff_alt = waypoints[wp].enu_i.z - start_alt;
-  int32_t alt = start_alt + ((diff_alt * nav_leg_progress) / nav_leg_length);
+  int32_t alt = start_alt + ((diff_alt * nav_leg_progress) / (int32_t)nav_leg_length);
   NavVerticalAltitudeMode(POS_FLOAT_OF_BFP(alt), 0);
 }
 

@@ -72,17 +72,20 @@
 
   <section name="IMU" prefix="IMU_">
   
-    <define name="GYRO_P_SIGN" value="1"/>
+    <!--define name="GYRO_P_SIGN" value="1"/>
     <define name="GYRO_Q_SIGN" value="-1"/>
-    <define name="GYRO_R_SIGN" value="-1"/> <!-- ugly hack for dead accel -->
+    <define name="GYRO_R_SIGN" value="-1"/>
 
     <define name="ACCEL_X_SIGN" value="1"/>
     <define name="ACCEL_Y_SIGN" value="-1"/>
-    <define name="ACCEL_Z_SIGN" value="-1"/>
+    <define name="ACCEL_Z_SIGN" value="-1"/-->
     
     <define name="BODY_TO_IMU_PHI"   value="0." unit="deg"/>
+    <define name="BODY_TO_IMU_THETA" value="180." unit="deg"/>
+    <define name="BODY_TO_IMU_PSI"   value="-8." unit="deg"/>
+    <!--define name="BODY_TO_IMU_PHI"   value="0." unit="deg"/>
     <define name="BODY_TO_IMU_THETA" value="0." unit="deg"/>
-    <define name="BODY_TO_IMU_PSI"   value="0." unit="deg"/>
+    <define name="BODY_TO_IMU_PSI"   value="-8." unit="deg"/-->
   </section>
 
   <section name="AHRS" prefix="AHRS_">
@@ -111,7 +114,6 @@
   <section name="SIMULATOR" prefix="NPS_">
     <define name="ACTUATOR_NAMES"  value="nw_motor, ne_motor, se_motor, sw_motor" type="string[]"/>
     <define name="JSBSIM_MODEL"    value="HOOPERFLY/hooperfly_teensyfly_quad" type="string"/>
-    <define name="SENSORS_PARAMS" value="nps_sensors_params_default.h" type="string"/>
     <!-- mode switch on joystick channel 5 (axis numbering starting at zero) -->
     <define name="JS_AXIS_MODE" value="4"/>
   </section>
@@ -136,7 +138,7 @@
     <define name="ALT_SHIFT_PLUS_PLUS" value="5"/>
     <define name="ALT_SHIFT_PLUS"      value="1"/>
     <define name="ALT_SHIFT_MINUS"     value="-1"/>
-    <define name="AC_ICON"             value="quadrotor_x"/>
+    <define name="AC_ICON"             value="rover"/>
   </section>
 
 </airframe>

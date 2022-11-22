@@ -336,7 +336,7 @@ let rec index_stage = fun x ->
         incr stage; (* To count the loop stage *)
         Xml.Element (Xml.tag x, Xml.attribs x@["no", soi n], l)
       | "return" | "goto"  | "deroute" | "exit_block" | "follow" | "call" | "call_once" | "home"
-      | "heading" | "attitude" | "manual" | "go" | "stay" | "xyz" | "set" | "circle" ->
+      | "heading" | "attitude" | "manual" | "go" | "stay" | "xyz" | "set" | "circle" | "guided" ->
         incr stage;
         Xml.Element (Xml.tag x, Xml.attribs x@["no", soi !stage], Xml.children x)
       | "survey_rectangle" | "eight" | "oval"->
@@ -549,6 +549,17 @@ let rec print_stage = fun out index_of_waypoints x ->
         let t = ExtXml.attrib_or_default x "nav_type" "Nav" in
         let p = try ", " ^ (Xml.attrib x "nav_params") with _ -> "" in
         lprintf out "%sCircleWaypoint(%s, %s%s);\n" t wp r p;
+        stage_until out x;
+        fp_post_call out x;
+        lprintf out "break;\n"
+      | "guided" ->
+        stage out;
+        fp_pre_call out x;
+        let cmds = ExtXml.attrib x "commands" in
+        let flags = ExtXml.attrib_or_default x "flags" "0" in
+        let t = ExtXml.attrib_or_default x "nav_type" "Nav" in
+        let p = try ", " ^ (Xml.attrib x "nav_params") with _ -> "" in
+        lprintf out "%sGuided(%s, %s%s);\n" t flags cmds p;
         stage_until out x;
         fp_post_call out x;
         lprintf out "break;\n"
@@ -1089,6 +1100,7 @@ let print_flight_plan_h = fun xml ref0 xml_file out_file ->
     List.map (fun w -> incr i; (name_of w, !i)) waypoints in
 
   (* print sectors *)
+  lprintf out "\n#ifndef FBW\n\n"; (* workaround to hide sector functions on FBW side *)
   let sectors_element = try ExtXml.child xml "sectors" with Not_found -> Xml.Element ("", [], []) in
   let sectors = List.filter (fun x -> String.lowercase_ascii (Xml.tag x) = "sector") (Xml.children sectors_element) in
   List.iter (fun x -> match ExtXml.attrib_opt x "type" with
@@ -1106,6 +1118,7 @@ let print_flight_plan_h = fun xml ref0 xml_file out_file ->
     with
         _ -> ()
   end;
+  lprintf out "\n#endif\n"; (* workaround to hide sector functions on FBW side *)
 
   (* start "C" part *)
   lprintf out "\n#ifdef NAV_C\n\n";
